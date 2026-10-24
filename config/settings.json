@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "autoMemoryEnabled": true,
+  "tui": "fullscreen",
+  "theme": "auto"
+}

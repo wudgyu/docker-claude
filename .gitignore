@@ -1,0 +1,5 @@
+claude.env
+*.env
+.claude.json
+!.env.example
+!claude.env.example

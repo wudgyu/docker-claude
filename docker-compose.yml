@@ -1,0 +1,28 @@
+services:
+  claude:
+    build:
+      context: .
+      args:
+        UID: "${HOST_UID:-1000}"
+        GID: "${HOST_GID:-1000}"
+        USERNAME: "${CONTAINER_USER:-claude}"
+        NPM_REGISTRY: "${NPM_REGISTRY:-https://registry.npmjs.org}"
+    image: claude-code:local
+    init: true
+    stdin_open: true
+    tty: true
+    working_dir: ${WORKSPACE_HOST_DIR:-$HOME/workspace}
+    environment:
+      HOME: /home/${CONTAINER_USER:-claude}
+      CLAUDE_CONFIG_DIR: /config
+      TERM: xterm-256color
+      TZ: "${TZ:-UTC}"
+    env_file:
+      - ${CLAUDE_DOCKER_CONFIG_DIR:-$HOME/.claude-docker}/claude.env
+    volumes:
+      # 容器内保持与宿主机相同的绝对路径，复用 .claude.json 中的项目信任记录
+      - ${WORKSPACE_HOST_DIR:-$HOME/workspace}:${WORKSPACE_HOST_DIR:-$HOME/workspace}
+      # 容器专用配置目录，不影响宿主机 ~/.claude
+      - ${CLAUDE_DOCKER_CONFIG_DIR:-$HOME/.claude-docker}:/config
+      # 可选：复用宿主机 git 配置
+      # - ${HOME}/.gitconfig:/home/${CONTAINER_USER:-claude}/.gitconfig:ro
