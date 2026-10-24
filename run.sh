@@ -30,14 +30,19 @@ export HOST_UID="$(id -u)"
 export HOST_GID="$(id -g)"
 export CONTAINER_USER="${CONTAINER_USER:-claude}"
 export CLAUDE_DOCKER_CONFIG_DIR="${CLAUDE_DOCKER_CONFIG_DIR:-${HOME}/.claude-docker}"
+export HOST_CLAUDE_DIR="${HOST_CLAUDE_DIR:-${HOME}/.claude}"
+
+mkdir -p "${HOST_CLAUDE_DIR}"
+for dir in skills agents commands output-styles rules themes workflows routines plugins; do
+  mkdir -p "${HOST_CLAUDE_DIR}/${dir}"
+done
 
 WORKSPACE_HOST_DIR="${WORKSPACE_HOST_DIR:-${HOME}/workspace}"
 mkdir -p "${WORKSPACE_HOST_DIR}"
 export WORKSPACE_HOST_DIR="$(cd "${WORKSPACE_HOST_DIR}" && pwd -P)"
 
-if [[ ! -f "${CLAUDE_DOCKER_CONFIG_DIR}/settings.json" || ! -f "${CLAUDE_DOCKER_CONFIG_DIR}/claude.env" ]]; then
-  "${HERE}/init-host.sh"
-fi
+# 每次启动都刷新：同步宿主机 settings/env、技能链接和配置目录
+"${HERE}/init-host.sh"
 
 if ! docker image inspect claude-code:local >/dev/null 2>&1; then
   "${COMPOSE[@]}" build

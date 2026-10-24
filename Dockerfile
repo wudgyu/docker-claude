@@ -23,6 +23,10 @@ RUN npm config set registry "${NPM_REGISTRY}" \
  && npm install -g @anthropic-ai/claude-code \
  && npm cache clean --force
 
+# 兼容仍读取 ~/.claude 和 ~/.claude.json 的工具；运行时指向挂载的合并配置
+RUN ln -s /config "/home/${USERNAME}/.claude" \
+ && ln -s /config/.claude.json "/home/${USERNAME}/.claude.json"
+
 USER ${USERNAME}
 ENV HOME=/home/${USERNAME}
 ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"

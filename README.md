@@ -29,10 +29,16 @@ sudo usermod -aG docker "$USER" && newgrp docker
 首次运行会自动完成：
 
 1. 创建 `~/.claude-docker/`（可用 `CLAUDE_DOCKER_CONFIG_DIR` 覆盖）；
-2. 写入开启完全自动模式的 `settings.json`；
+2. 合并宿主机 `~/.claude/settings.json`（保留 hooks、plugins 等配置），
+   强制 `bypassPermissions` 并移除 read-block；
 3. 从 `~/.claude/settings.json` 的 `env` 段导出模型/网关配置到 `claude.env`；
 4. 复制 `~/.claude.json`，复用引导状态和项目信任记录；
 5. 构建镜像并启动容器。
+
+`run.sh` 每次启动都会重新执行上述 1-3 步，宿主机 `settings.json`、`env`
+和技能目录的改动无需重建镜像即可生效；容器内 `.claude.json` 不会被覆盖。
+因此容器内的 `settings.json` 是生成产物，请修改宿主机
+`~/.claude/settings.json`，不要直接改 `~/.claude-docker/settings.json`。
 
 也可以分步执行：
 
@@ -51,6 +57,7 @@ docker-compose run --rm claude
 | `WORKSPACE_HOST_DIR` | `$HOME/workspace` | 挂载到容器内同一绝对路径的工作区 |
 | `CLAUDE_DOCKER_CONFIG_DIR` | `$HOME/.claude-docker` | 容器专用配置目录，挂载为 `/config` |
 | `CONTAINER_USER` | `claude` | 容器内用户名 |
+| `HOST_CLAUDE_DIR` | `$HOME/.claude` | 宿主机用户级配置目录，只读挂载复用 |
 | `HOST_UID` / `HOST_GID` | 当前用户 | 构建参数，默认由 `run.sh` 注入 |
 | `NPM_REGISTRY` | `https://registry.npmjs.org` | 构建时的 npm 源 |
 | `TZ` | `UTC` | 容器时区 |
@@ -79,6 +86,25 @@ ANTHROPIC_MODEL=your-model
 - `CLAUDE_CONFIG_DIR=/config` 指向挂载的独立目录，不修改宿主机 `~/.claude`。
 - `settings.json` 中不包含 `blockReadsOutsideWorkingDirectories`，因此不会出现
   “变量/引号无法静态分析”一类确认。
+
+### 复用的宿主机配置
+
+以下目录从 `~/.claude/` 只读挂载到容器配置目录，宿主机的修改会实时生效：
+
+- `skills/`、`agents/`、`commands/`
+- `output-styles/`、`rules/`、`themes/`
+- `workflows/`、`routines/`
+- `plugins/`（读写，保留插件缓存）
+- `CLAUDE.md`、`keybindings.json`（通过 `/host-claude` 符号链接）
+- `settings.json`（合并，保留 hooks、enabledPlugins 等）
+- `~/.claude.json`（复制，复用 onboarding、MCP 和项目信任）
+
+项目级 `.claude/`、`.mcp.json`、`CLAUDE.md` 位于工作区，已随工作区挂载。
+
+注意：宿主机 `settings.json` 中的 hook 命令、MCP server 配置若依赖宿主机
+特有路径或程序，在容器内可能不可用；会话历史（`projects/`、`history.jsonl`）
+未共享，避免与宿主机同时写入冲突。
+`skills/` 等目录为只读，新增或修改个人技能请在宿主机完成。
 
 ## 安全提示
 

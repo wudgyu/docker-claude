@@ -24,5 +24,17 @@ services:
       - ${WORKSPACE_HOST_DIR:-$HOME/workspace}:${WORKSPACE_HOST_DIR:-$HOME/workspace}
       # 容器专用配置目录，不影响宿主机 ~/.claude
       - ${CLAUDE_DOCKER_CONFIG_DIR:-$HOME/.claude-docker}:/config
+      # 只读复用宿主机用户级配置
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}:/host-claude:ro
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}/skills:/config/skills:ro
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}/agents:/config/agents:ro
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}/commands:/config/commands:ro
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}/output-styles:/config/output-styles:ro
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}/rules:/config/rules:ro
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}/themes:/config/themes:ro
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}/workflows:/config/workflows:ro
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}/routines:/config/routines:ro
+      # 插件需要缓存写入，保持读写；如只读加载可改为 :ro
+      - ${HOST_CLAUDE_DIR:-$HOME/.claude}/plugins:/config/plugins
       # 可选：复用宿主机 git 配置
       # - ${HOME}/.gitconfig:/home/${CONTAINER_USER:-claude}/.gitconfig:ro
