@@ -86,6 +86,8 @@ ANTHROPIC_MODEL=your-model
 - `CLAUDE_CONFIG_DIR=/config` 指向挂载的独立目录，不修改宿主机 `~/.claude`。
 - `settings.json` 中不包含 `blockReadsOutsideWorkingDirectories`，因此不会出现
   “变量/引号无法静态分析”一类确认。
+- 强制开启 `skipWebFetchPreflight`，跳过 WebFetch 的域名安全预检；否则在
+  无法访问 claude.ai 的网络里会报 `Unable to verify if domain ... is safe to fetch`。
 
 ### 复用的宿主机配置
 

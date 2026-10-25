@@ -3,6 +3,7 @@
     "defaultMode": "bypassPermissions"
   },
   "skipDangerousModePermissionPrompt": true,
+  "skipWebFetchPreflight": true,
   "autoMemoryEnabled": true,
   "tui": "fullscreen",
   "theme": "auto"

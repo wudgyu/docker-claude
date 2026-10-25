@@ -18,6 +18,7 @@ if command -v jq >/dev/null 2>&1 && [[ -f "${SRC_SETTINGS}" ]]; then
       | del(.blockReadsOutsideWorkingDirectories, .disableBypassPermissionsMode))
       + {"defaultMode": "bypassPermissions"})))
     | .skipDangerousModePermissionPrompt = true
+    | .skipWebFetchPreflight = true
     | .autoMemoryEnabled = (.autoMemoryEnabled // true)
     | (if .env then .env |= del(.CLAUDE_CONFIG_DIR) else . end)
   ' "${SRC_SETTINGS}" > "${CONFIG_DIR}/settings.json"
