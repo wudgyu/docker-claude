@@ -17,6 +17,9 @@ services:
       CLAUDE_CONFIG_DIR: /config
       TERM: xterm-256color
       TZ: "${TZ:-UTC}"
+      HTTP_PROXY: "${HTTP_PROXY:-}"
+      HTTPS_PROXY: "${HTTPS_PROXY:-}"
+      NO_PROXY: "${NO_PROXY:-localhost,127.0.0.1}"
     env_file:
       - ${CLAUDE_DOCKER_CONFIG_DIR:-$HOME/.claude-docker}/claude.env
     volumes:
@@ -38,3 +41,6 @@ services:
       - ${HOST_CLAUDE_DIR:-$HOME/.claude}/plugins:/config/plugins
       # 可选：复用宿主机 git 配置
       # - ${HOME}/.gitconfig:/home/${CONTAINER_USER:-claude}/.gitconfig:ro
+    extra_hosts:
+      # Linux 下允许容器使用 http://host.docker.internal:PORT 访问宿主机代理
+      - "host.docker.internal:host-gateway"

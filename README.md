@@ -61,6 +61,7 @@ docker-compose run --rm claude
 | `HOST_UID` / `HOST_GID` | 当前用户 | 构建参数，默认由 `run.sh` 注入 |
 | `NPM_REGISTRY` | `https://registry.npmjs.org` | 构建时的 npm 源 |
 | `TZ` | `UTC` | 容器时区 |
+| `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` | 空 | 传入容器的标准代理变量，用于访问 GitHub 等受限站点 |
 
 `claude.env` 支持两种认证方式，二选一：
 
@@ -77,6 +78,23 @@ ANTHROPIC_MODEL=your-model
 ```
 
 修改后重新运行即可，`claude.env` 不会被写入镜像。
+
+## 网络代理
+
+如果容器内出现 `Fetch ... timeout of 60000ms exceeded`，尤其是访问
+`raw.githubusercontent.com` 时，通常是容器无法直接访问该站点。启动时传入代理：
+
+```bash
+HTTPS_PROXY=http://host.docker.internal:7890 ./run.sh
+```
+
+Linux 容器中 `host.docker.internal` 已通过 `host-gateway` 指向宿主机。
+如果代理只监听 `127.0.0.1`，请改成监听 `0.0.0.0`，或改用 Docker 网桥地址
+（通常是 `http://172.17.0.1:7890`）。只处理本地地址时保持默认：
+
+```bash
+NO_PROXY=localhost,127.0.0.1
+```
 
 ## 工作原理
 
